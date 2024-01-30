@@ -1,0 +1,1 @@
+draw_sprite_ext(spr_weapon, image_index, x, y + (2 * dsin(__r + 150 * game.run.rta)), 1, 1, 90, c_white, 1);

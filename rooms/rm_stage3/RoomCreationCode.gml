@@ -1,0 +1,1 @@
+global.tileset = [spr_block_lobby_big, spr_block_lobby_medium, spr_block_lobby_small, spr_semisolid_lobby];

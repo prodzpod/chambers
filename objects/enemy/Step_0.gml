@@ -1,0 +1,1 @@
+if (instance_exists(player)) _aim = darctan2(player.ycenter - ycenter, player.xcenter - xcenter);

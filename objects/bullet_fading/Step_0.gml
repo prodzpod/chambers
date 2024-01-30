@@ -1,0 +1,1 @@
+image_alpha = life / _life;
