@@ -1,0 +1,2 @@
+label = "Confirm";
+key = "confirm";

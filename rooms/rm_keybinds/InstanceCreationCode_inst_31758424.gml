@@ -1,0 +1,2 @@
+label = "Cancel";
+key = "cancel";

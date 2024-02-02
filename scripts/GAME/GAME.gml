@@ -1,7 +1,7 @@
 // feather ignore GM2022
 
 function run_init() {
-	game.run = global.RUN_DEFAULT;
+	game.run = json_parse(json_stringify(global.RUN_DEFAULT));
 	game.gameSpeed = 1;
 	game.save.deaths += 1;
 	array_push(game.save.runs, {death: "Disconnection", inventory: []});
@@ -17,7 +17,7 @@ function bullet_spawn(obj, lf, dmg, prio=0, spec=false, pier=false, etc) {
 		cancel_priority = prio;
 		spectral = spec;
 		piercing = pier;
-		if (lf > 0) life = lf;
+		if (lf > 0) _life = lf;
 		if (!is_undefined(etc)) etc(other, self);
 		if (other.object_index == player) weapon = game.run.inventory[0];
 	}
@@ -48,11 +48,12 @@ function bullet_spawn_ext(obj, life, dmg, aim, speed, spread=0, size=1, prio=0, 
 function player_damage(source, amount, onhit) {
 	if (player._immunity > 0) return;
 	player._immunity = game.run.immunity;
-	game.run.hp -= amount;
+	if (game.run.shield > 0) game.run.shield--;
+	else game.run.hp -= amount;
 	if (!is_undefined(onhit)) onhit(source, instance_find(player, 0), amount);
 	source.onhit(amount);
 	(stat("onhurt"))(player, source, amount, game.run.class == stat("class"), game.run.inventory[0] < 0);
-	player.onhurt(source, amount);
+	if (instance_exists(player)) player.onhurt(source, amount);
 	if (game.run.hp <= 0) player_die(source);
 	play_sfx(sfx_cowbell);
 	play_sfx(sfx_hat);
@@ -63,15 +64,15 @@ function enemy_damage(source, target, amount, onhit) {
 	if (!is_undefined(onhit)) onhit(source, target, amount);
 	var weapon = is_undefined(source.weapon) ? 0 : source.weapon;
 	(struct_default(game.WEAPON[abs(source.weapon)], "onhit", game.DEFAULT_WEAPON))(player, source, target, amount, game.run.class == struct_default(game.WEAPON[abs(source.weapon)], "class", game.DEFAULT_WEAPON), sign(source.weapon) == -1);
-	player.onhit(target, amount, weapon);
+	if (instance_exists(player)) player.onhit(target, amount, weapon);
 	global.temp = amount;
 	particle_spawn(1, target.x, target.y, function(p) { 
-		p.label = string(floor(global.temp * 100) / 100);
+		p.label = string_pretty(global.temp < 1 ? global.temp : floor(global.temp));
 		p.angle = 0;
 		p.aangle = vrandom(10);
 		p.size = log10(global.temp + 1) + 1;
 	});
-	if (instance_exists(source.parent)) source.parent.onhurt(weapon, amount);
+	if (instance_exists(target)) target.onhurt(weapon, amount);
 	if (target.hp <= 0) enemy_die(target);
 }
 
@@ -85,8 +86,7 @@ function enemy_stun(target, r, a, duration) {
 			this.yspeed = global.temp.r * dsin(global.temp.a);
 		},
 		onstep: function(this, t) {
-			this.xspeed = lerp(this.xspeed, 0, 0.9);
-			this.yspeed = lerp(this.yspeed, 0, 0.9);
+			this.xspeed = lerp(this.xspeed, 0, 0.05);
 		},
 		onend: function(this) { this.stunned = false; return "idle"; }
 	});
@@ -121,7 +121,7 @@ function player_die(source) {
 	game.save.died_to[$ name]++;
 	instance_destroy(player);
 	// display status screen
-	game.alarm[2] = 180;
+	with (instance_create_depth(game.cameraX, game.cameraY, -100, result_screen)) success = false;
 	play_sfx(sfx_snare);
 	play_sfx(sfx_chime);
 }
@@ -133,7 +133,9 @@ function enemy_die(target) {
 	game.save.killed[$ name]++;
 	particle_spawn(8, target.x, target.y);
 	screen_shake(2, 0.2);
-	if (target.object_index == boss) game.alarm[3] = 180;
+	if (target.object_index == boss) 
+		with (instance_create_depth(game.cameraX, game.cameraY, -100, result_screen)) success = true;
+	target.ondeath();
 	instance_destroy(target);
 	play_sfx(sfx_hat);
 	play_sfx(sfx_conga);
@@ -186,7 +188,7 @@ function set_rooms(width, exits, size, special) {
 	global.temp = {_x: _x, _y: _y};
 	array_map(game.rooms[game.dungeon[0].idx][4], function(a) { 
 		var offset = rooms_get_offset(a)
-		array_push(global.freeConnections, [global.temp._x + offset[0], global.temp._y + offset[1], a]); 
+		array_push(global.freeConnections, [global.temp._x + offset[0], global.temp._y + offset[1], a, 0]); 
 	}); // add first connection
 	// generate rooms
 	for (var i = 0; i < size; i++) {
@@ -195,7 +197,7 @@ function set_rooms(width, exits, size, special) {
 		var eligible = [];
 		var op = rooms_get_opposite(connection[2]);
 		for (var j = 0; j < array_length(game.rooms); j++) {
-			if (j == 0 || array_contains(special, j)) continue;
+			if (j == 0 || array_contains(special, j) || j == connection[3]) continue;
 			if (array_contains(game.rooms[j][4], op)) array_push(eligible, j);
 		}
 		if (array_length(eligible) == 0) { i--; continue; }
@@ -230,6 +232,22 @@ function set_rooms(width, exits, size, special) {
 				block_room(game.dungeon[i].pos[0], game.dungeon[i].pos[1], d);
 		}
 	}
+	// create solid block rooms
+	var blanks = [];
+	for (var i = 0; i < array_length(game.rooms); i++) if (game.rooms[i][4][0] == "") array_push(blanks, i);
+	if (array_length(blanks) > 0) {
+		var len = array_length(game.dungeon);
+		for (var i = 0; i < len; i++) {
+			var p = game.dungeon[i].pos;
+			var ps = [[p[0] + 1, p[1] + 1], [p[0] + 1, p[1]], [p[0] + 1, p[1] - 1], [p[0], p[1] + 1], [p[0], p[1] - 1], [p[0] - 1, p[1] + 1], [p[0] - 1, p[1]], [p[0] - 1, p[1] - 1]];
+			for (var k = 0; k < array_length(ps); k++) {
+				var q = ps[k];
+				var found = false;
+				for (var j = 0; j < array_length(game.dungeon); j++) if (game.dungeon[j].pos[0] == q[0] && game.dungeon[j].pos[1] == q[1]) { found = true; break; }
+				if (!found) array_push(game.dungeon, {idx: array_random(blanks), pos: [q[0], q[1]]});
+			}
+		}
+	}
 	// actually generate rooms
 	for (var i = 0; i < array_length(game.dungeon); i++) {
 		var r = game.rooms[game.dungeon[i].idx];
@@ -238,27 +256,20 @@ function set_rooms(width, exits, size, special) {
 		var to = [p[0] * 480, p[0] * 480 + 480, p[1] * 270, p[1] * 270 + 270];
 		global.temp = {r: r, p: p};
 		ds_list_clear(game.temp);
-		collision_rectangle_list(r[0] + 2, r[1] + 2, r[2] - 2, r[3] - 2, block, false, false, game.temp, false);
-		collision_rectangle_list(r[0] + 2, r[1] + 2, r[2] - 2, r[3] - 2, semisolid, false, false, game.temp, false);
-		collision_rectangle_list(r[0] + 2, r[1] + 2, r[2] - 2, r[3] - 2, physics, false, false, game.temp, false);
-		map(game.temp, function(this) { with (this) with (instance_copy(true)) { if (object_index == chest && !is_undefined(other.loot)) loot = other.loot; x = global.temp.p[0] * 480 - global.temp.r[0] + other.x; y = global.temp.p[1] * 270 - global.temp.r[1] + other.y; }});
+		with (game) collision_rectangle_list(r[0] + 2, r[1] + 2, r[2] - 2, r[3] - 2, all, false, true, game.temp, false);
+		map(game.temp, function(this) { with (this) with (instance_copy(true)) { if (object_index == chest && !is_undefined(other.loot)) loot = other.loot; if (object_index == zone) onenter = other.onenter; x = global.temp.p[0] * 480 - global.temp.r[0] + other.x; y = global.temp.p[1] * 270 - global.temp.r[1] + other.y; }});
 	}
 	// remove traces	
 	ds_list_clear(game.temp);
-	collision_rectangle_list(2, 2, width * 480 + 478, height * 270 + 268, block, false, false, game.temp, false);
-	collision_rectangle_list(2, 2, width * 480 + 478, height * 270 + 268, semisolid, false, false, game.temp, false);
-	collision_rectangle_list(2, 2, width * 480 + 478, height * 270 + 268, physics, false, false, game.temp, false);
+	with (game) collision_rectangle_list(2, 2, width * 480 + 478, height * 270 + 268, all, false, true, game.temp, false);
 	map(game.temp, function(this) { instance_destroy(this) });
-	log(game.dungeon);
 	// fetch boss
-	with (game) {
-		global.boss = http_get("http://pub.colonq.computer/~prod/cgi-bin/api.cgi?room=" + room_get_name(room) + "&elo=" + string(game.save.elo));
-	}
+	if (game.save.online) with (game) global.boss = http_get("http://pub.colonq.computer/~prod/cgi-bin/api.cgi?action=chambers_load&room=" + room_get_name(room) + "&elo=" + string(save.elo));
 }
 
 function connect_room(idx, x, y) { 
 	array_push(game.dungeon, { idx: idx, pos: [x, y] });
-	global.temp = {x: x, y: y};
+	global.temp = {x: x, y: y, idx: idx};
 	array_map(game.rooms[idx][4], function(a) { 
 		var offset = rooms_get_offset(a);
 		global.temp.offset = offset;
@@ -266,8 +277,7 @@ function connect_room(idx, x, y) {
 			return x.pos[0] == global.temp.x + global.temp.offset[0]
 			&& x.pos[1] == global.temp.y + global.temp.offset[1];
 		}) == -1) {
-			log("pushing", a, "from", global.temp.x, global.temp.y);
-			array_push(global.freeConnections, [global.temp.x + offset[0], global.temp.y + offset[1], a]); 
+			array_push(global.freeConnections, [global.temp.x + offset[0], global.temp.y + offset[1], a, global.temp.idx]); 
 		}
 	});
 	global.temp = {x: x, y: y};

@@ -1,0 +1,2 @@
+label = "Left";
+key = "left";

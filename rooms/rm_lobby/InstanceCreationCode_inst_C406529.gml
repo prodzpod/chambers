@@ -1,0 +1,1 @@
+if (!array_contains(game.run.cleared, rm_stage1)) instance_destroy();

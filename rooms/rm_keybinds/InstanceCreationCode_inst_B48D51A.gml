@@ -1,0 +1,2 @@
+label = "Up";
+key = "up";

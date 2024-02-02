@@ -1,1 +1,0 @@
-text = "yeah im sorry the boss isnt networked (yet)";

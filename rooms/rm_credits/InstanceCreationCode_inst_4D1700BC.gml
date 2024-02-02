@@ -1,0 +1,1 @@
+text = "made for LCOLONQ game jam"

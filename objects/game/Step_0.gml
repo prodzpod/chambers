@@ -3,9 +3,9 @@ global.t = delta_time * gameSpeed / 1000000;
 run.rta += delta_time / 1000000;
 run.igt += global.t;
 
-_cameraOffX = keyboard_check(ord("D")) - keyboard_check(ord("A"));
-_cameraOffY = keyboard_check(ord("S")) - keyboard_check(ord("W"));
-if (!keyboard_check(vk_shift)) { _cameraOffX = 0; _cameraOffY = 0; }
+_cameraOffX = save.peekwithaim ? input_check(save.aimright, save.aimleft) : input_check(save.right, save.left);
+_cameraOffY = save.peekwithaim ? input_check(save.aimdown, save.aimup) : input_check(save.down, save.up);
+if (!input_check(save.peek)) { _cameraOffX = 0; _cameraOffY = 0; }
 __cameraOffX = lerp(__cameraOffX, _cameraOffX, 0.1);
 __cameraOffY = lerp(__cameraOffY, _cameraOffY, 0.1);
 
@@ -91,7 +91,7 @@ object_foreach(bullet, function(this) {
 		if (ysub > 1) { tomove += 1; ysub -= 1; }
 		for (var i = 0; i < abs(tomove) - 1; i++) {
 			if (!spectral && (place_meeting(x, y + sig, block) || (sig > 0 && instance_position(x, y + sig, semisolid)))) {
-				if (!onbounce(sig == 1 ? 90 : -90)) instance_destroy();
+				if (!onbounce(sig == 1 ? 90 : -90) && !inv) instance_destroy();
 			}
 			y += sig;
 			checkBullet(this);
@@ -111,13 +111,8 @@ if (instance_exists(player)) {
 	while ((cameraY + 270) < player.y) cameraY += 270;
 }
 
-if (_screenshakeDuration > 0) {
-	_screenshakeDuration -= delta_time / 1000000;
-}
-
-if (_tooltipDuration > 0) {
-	_tooltipDuration -= delta_time / 1000000;
-}
+if (_screenshakeDuration > 0) _screenshakeDuration -= delta_time / 1000000;
+if (_tooltipDuration > 0) _tooltipDuration -= delta_time / 1000000;
 
 if (instance_exists(boss) && cameraX <= boss.x && boss.x <= cameraX + 480 && cameraY <= boss.y && boss.y <= cameraY + 270) {
 	if (shouldActivateBoss > 0) {
@@ -125,7 +120,24 @@ if (instance_exists(boss) && cameraX <= boss.x && boss.x <= cameraX + 480 && cam
 		if (shouldActivateBoss <= 0) {
 			boss.activate = true;
 			play_sfx(sfx_snare);
-			play_bgm(bgm_boss);
+			switch (room) {
+				case rm_stage1:
+					play_bgm(bgm_boss);
+					break;
+				case rm_stage2:
+					play_bgm(bgm_boss2);
+					break;
+				case rm_stage3:
+					play_bgm(bgm_boss3);
+					break;
+			}
+			global.temp_hp = run.hp;
 		}
+		else if (!boss.activate) global.temp_hp = run.hp;
 	}
 } else shouldActivateBoss = 5;
+
+if (mouse_check_button_released(mb_left) && os_browser != browser_not_a_browser && room == rm_init) {
+	room_goto(rm_character);
+	bgm = audio_play_sound(bgm_main, 0, true, save.bgm);
+}

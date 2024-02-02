@@ -1,0 +1,2 @@
+label = "Retry";
+key = "death";

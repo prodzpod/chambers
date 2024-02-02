@@ -25,7 +25,7 @@ onstep = function(t) {
 	else STATE_DEFAULT.onstep(self, t);
 	time_state += t;
 	if (time_state >= (struct_exists(state, "duration") ? state.duration : STATE_DEFAULT.duration)) changeState();
-	if (stateName != "stunned" && _headbuttImmune <= 0 && place_meeting(x, y, player)) {
+	if (stateName != "stunned" && headbuttDamage > 0 && _headbuttImmune <= 0 && place_meeting(x, y, player)) {
 		player_damage(self, headbuttDamage);
 		_headbuttImmune = headbuttImmune;
 	} 

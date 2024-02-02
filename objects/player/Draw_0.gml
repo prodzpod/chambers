@@ -14,14 +14,15 @@ draw_sprite_ext(spr_player, 5, x, y, image_xscale * face, image_yscale, image_an
 
 draw_sprite_ext(spr_hair, type_hair, x, y, image_xscale * face, image_yscale, image_angle, color_multiply(image_blend, color_hair), alpha);
 draw_sprite_ext(spr_cosmetic, type_cosmetic, x, y, image_xscale * face, image_yscale, image_angle, image_blend, alpha);
-var aim = _aim + (_recoil * (_reload / (game.run.reload * stat("reload"))));
+var aim = _aim;
+if (_reload > 0) aim += _recoil * _reload / game.run.reload / stat("reload");
 if (face == -1) aim += 180;
-draw_sprite_ext(spr_weapon, abs(game.run.inventory[0]), x + (6 * face), y - 9, image_xscale * face, image_yscale, image_angle + aim, sign(game.run.inventory[0]) == 1 ? c_white : c_yellow, alpha);
+draw_sprite_ext(spr_weapon, abs(game.run.inventory[0]), x + (6 * face), ycenter, image_xscale * face, image_yscale, image_angle + aim, sign(game.run.inventory[0]) == 1 ? c_white : c_yellow, alpha);
 if (room != rm_character) {
 	draw_sprite_ext(spr_aim, -1, xcenter, ycenter, image_xscale * face, image_yscale, image_angle + _aim + 90 - (90 * face), image_blend, image_alpha);
 	if (_reload > 0) {
 		draw_set_font(global.fnt_small);
-		draw_text_outline(x + 4, y - 20, _reload, c_white);
+		draw_text_outline(x + 4, y - 20, string_pretty(ceil(_reload * 10) / 10), c_white);
 		draw_set_font(fnt_alagard);
 	}
 }

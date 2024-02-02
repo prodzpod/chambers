@@ -1,12 +1,5 @@
 if (!clicked) return;
-if (keyboard_key == vk_enter) {
-	if (oninput(input)) {
-		play_sfx(sfx_hat);
-		input = "";
-		keyboard_string = "";
-	}
-}
-else {
+if (keyboard_key != game.save.confirm && keyboard_key != game.save.cancel) {
 	input = keyboard_string;
 	ontype(input);
 }

@@ -1,0 +1,1 @@
+text = "thank you, computer"

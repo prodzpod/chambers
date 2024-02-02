@@ -1,0 +1,1 @@
+onenter = function(i) { if (i.object_index == player) { room_goto(rm_lobby); play_bgm(bgm_main); }}

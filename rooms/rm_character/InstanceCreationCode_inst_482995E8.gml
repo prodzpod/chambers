@@ -1,1 +1,1 @@
-text = "Character Creation"
+text = "Little Guy Creation"

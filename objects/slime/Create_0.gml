@@ -1,4 +1,7 @@
 event_inherited();
+image_speed = 0;
+if (room == rm_stage2) image_index = 1;
+else if (room == rm_stage2) image_index = 2;
 face = sign(vrandom(1));
 states = {
 	idle: {
@@ -24,8 +27,8 @@ states = {
 	attack: {
 		duration: 2,
 		onenter: function(this) { with(this) {
-			xspeed += JUMP * dcos(aim);
-			yspeed += JUMP * (dsin(aim) - 1);
+			xspeed += JUMP / 2 * dcos(aim);
+			yspeed += JUMP * (dsin(aim) - 1) - 200;
 		}}
 	}
 }
@@ -33,7 +36,7 @@ aim = 0;
 SPEED = 120;
 VIEW = 64;
 JUMP = 200;
-DAMAGE = 0.25;
+DAMAGE = 0.5;
 _SPEED = 0;
 _VIEW = 0;
 _JUMP = 0;

@@ -113,7 +113,9 @@ function vrandom(a) {
 }
 
 function window_apply_resolution() {
-	window_set_rectangle(window_get_x() - 240 * (save.resolution - 1), window_get_y() - 135 * (save.resolution - 1), 480 * save.resolution, 270 * save.resolution);
+	var _x = window_get_x() + (window_get_width() / 2) - (240 * game.save.resolution);
+	var _y = window_get_y() + (window_get_height() / 2) - (135 * game.save.resolution);
+	window_set_rectangle(_x, _y, 480 * game.save.resolution, 270 * game.save.resolution);
 }
 
 function isPlayer(target) { 
@@ -145,4 +147,138 @@ function array_random(arr) {
 
 function timeout(duration, fn) {
 	with (instance_create_depth(0, 0, 0, delay)) { time = duration; onalarm = fn; }
+}
+
+function wheel_check(key) {
+	if (key == mb_wheelup) return mouse_wheel_up();
+	if (key == mb_wheeldown) return mouse_wheel_down();
+	return -1; // not a wheel key
+}
+
+function key_is_mouse(key) {
+	return key == mb_left
+		|| key == mb_right
+		|| key == mb_middle
+		|| key == mb_side1
+		|| key == mb_side2;
+}
+
+function generic_check(key, fn_keyboard, fn_mouse) {
+	var ret = wheel_check(key);
+	if (ret != -1) return ret;
+	if (key_is_mouse(key)) return fn_mouse(key);
+	else return fn_keyboard(key);
+}
+
+function input_check(key, neg=-1) {
+	var ret = generic_check(key, keyboard_check, mouse_check_button);
+	if (neg != -1) ret -= generic_check(neg, keyboard_check, mouse_check_button);
+	return ret;
+}
+
+function input_check_pressed(key, neg=-1) {
+	var ret = generic_check(key, keyboard_check_pressed, mouse_check_button_pressed);
+	if (neg != -1) ret -= generic_check(neg, keyboard_check_pressed, mouse_check_button_pressed);
+	return ret;
+}
+
+function input_check_released(key, neg=-1) {
+	var ret = generic_check(key, keyboard_check_released, mouse_check_button_released);
+	if (neg != -1) ret -= generic_check(neg, keyboard_check_released, mouse_check_button_released);
+	return ret;
+}
+
+function button_pretty(key) {
+	switch (key) {
+		case vk_nokey:
+			return "NONE";
+		case mb_left: return "LMB";
+		case mb_right: return "RMB";
+		case mb_middle: return "MMB";
+		case mb_side1: return "MS1";
+		case mb_side2: return "MS2";
+		case mb_wheelup: return "MWU";
+		case mb_wheeldown: return "MWD";
+		case vk_add: return "+";
+		case vk_alt: return "ALT";
+		case vk_backspace: return "BKSP";
+		case vk_control: return "CTRL";
+		case vk_decimal: return ".";
+		case vk_delete: return "DEL";
+		case vk_divide: return "/";
+		case vk_down: return "DOWN";
+		case vk_up: return "UP";
+		case vk_right: return "RIGHT";
+		case vk_left: return "LEFT";
+		case vk_end: return "END";
+		case vk_enter: return "ENTER";
+		case vk_escape: return "ESC";
+		case vk_f1: return "F1";
+		case vk_f2: return "F2";
+		case vk_f3: return "F3";
+		case vk_f4: return "F4";
+		case vk_f5: return "F5";
+		case vk_f6: return "F6";
+		case vk_f7: return "F7";
+		case vk_f8: return "F8";
+		case vk_f9: return "F9";
+		case vk_f10: return "F10";
+		case vk_f11: return "F11";
+		case vk_f12: return "F12";
+		case vk_home: return "HOME";
+		case vk_insert: return "INS";
+		case vk_lalt: return "ALT";
+		case vk_lcontrol: return "CTRL";
+		case vk_lshift: return "SHIFT";
+		case vk_multiply: return "*";
+		case vk_numpad9: return "9";
+		case vk_numpad8: return "8";
+		case vk_numpad7: return "7";
+		case vk_numpad6: return "6";
+		case vk_numpad5: return "5";
+		case vk_numpad4: return "4";
+		case vk_numpad3: return "3";
+		case vk_numpad2: return "2";
+		case vk_numpad1: return "1";
+		case vk_numpad0: return "0";
+		case vk_pagedown: return "PGDN";
+		case vk_pageup: return "PGUP";
+		case vk_printscreen: return "PRNT";
+		case vk_ralt: return "ALT";
+		case vk_rcontrol: return "CTRL";
+		case vk_rshift: return "SHIFT";
+		case vk_shift: return "SHIFT";
+		case vk_space: return "SPACE";
+		case vk_subtract: return "-";
+		case vk_tab: return "TAB";
+		default: return chr(key);
+	}
+}
+
+function flash_screen(dur, a, col=c_white) {
+	with (instance_create_depth(0, 0, -100, flash)) { duration = dur; alpha = a; color = col; }
+}
+
+function elo_calculate(elo, opponent, won) {
+	var k = 100;
+	var p = (1 / (1.0 + power(10, ((opponent - elo) / 400))));
+	return k * ((won ? 1 : 0) - p) + elo;
+}
+
+function date_timestamp(date) {
+	if (is_undefined(date)) date = date_current_datetime();
+	return floor(date_second_span(date_create_datetime(1990, 1, 1, 0, 0, 0), date)) + 631152000;
+}
+
+function date_from_timestamp(timestamp) {
+	var t = date_inc_second(25569+1, timestamp);
+	return date_inc_day(t, -1);
+}
+
+function base64_encode_safe(s) {
+	return string_replace_all(string_replace_all(string_replace_all(base64_encode(s), "+", "."), "/", "-"), "=", "_");
+}
+
+function base64_decode_safe(s) {
+	return base64_decode(string_replace_all(string_replace_all(string_replace_all(s, ".", "+"), "-", "/"), "_", "="));
 }

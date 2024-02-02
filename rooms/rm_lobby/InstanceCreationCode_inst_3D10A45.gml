@@ -1,0 +1,1 @@
+onenter= function(r){room_goto(rm_stage1);}

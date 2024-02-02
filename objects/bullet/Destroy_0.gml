@@ -1,0 +1,1 @@
+ondestroy(self);

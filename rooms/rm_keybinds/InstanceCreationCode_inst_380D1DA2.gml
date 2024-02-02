@@ -1,0 +1,2 @@
+label = "Jump";
+key = "jump";

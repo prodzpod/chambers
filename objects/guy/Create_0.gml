@@ -1,4 +1,7 @@
 event_inherited();
+image_speed = 0;
+if (room == rm_stage2) image_index = 1;
+else if (room == rm_stage2) image_index = 2;
 face = sign(vrandom(1));
 states = {
 	idle: {
@@ -25,11 +28,12 @@ states = {
 		duration: 0,
 		onenter: function(this) { with(this) {
 			bullet_spawn_ext(bullet, -1, 1, aim, JUMP, 15, 1, 0, false, false, c_yellow);
+			play_sfx(sfx_hat3);
 		}},
 		onend: function(this) { return "recharge" },
 	},
 	recharge: {
-		duration: 0.5,
+		duration: 0.75,
 		onstep: function(this, t) { with (this) {
 			if (grounded && (place_meeting(x + face, y, block) || !place_meeting(x + face, y + 1, block)))
 				face = -face;
