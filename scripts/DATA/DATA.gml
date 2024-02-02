@@ -212,8 +212,8 @@ function init_data() {
 			durability: 9999,
 			onuse: function(user, this, dmg, aim, isPlus, isGold) { 
 				with (this) {
-					z = bullet_spawn_ext(bullet, -1, dmg, aim, 200, 0, 1, 2, true, false, c_white, spr_windstrike);
-					z.onstep = function(t) { z.damage = max(0.1, z.damage - t); }; 
+					var z = bullet_spawn_ext(bullet, -1, dmg, aim, 200, 0, 1, 2, true, false, c_white, spr_windstrike);
+					with (z) onstep = function(t) { damage = max(0.1, damage - t); }; 
 					if (!isPlus) z.damage /= 10;
 				}
 			},
