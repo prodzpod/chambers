@@ -264,7 +264,7 @@ function set_rooms(width, exits, size, special) {
 	with (game) collision_rectangle_list(2, 2, width * 480 + 478, height * 270 + 268, all, false, true, game.temp, false);
 	map(game.temp, function(this) { instance_destroy(this) });
 	// fetch boss
-	if (game.save.online) with (game) global.boss = http_get("http://pub.colonq.computer/~prod/cgi-bin/api.cgi?action=chambers_load&room=" + room_get_name(room) + "&elo=" + string(save.elo));
+	if (game.save.online) with (game) global.boss = http_get("https://pub.colonq.computer/~prod/cgi-bin/api.cgi?action=chambers_load&room=" + room_get_name(room) + "&elo=" + string(save.elo));
 }
 
 function connect_room(idx, x, y) { 

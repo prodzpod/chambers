@@ -36,7 +36,7 @@ if (!instance_exists(boss) || boss.activate) {
 			array_push(args, string(k) + "=" + string(v));
 		}
 	} else array_push(args, "action=chambers_loss"); // count losses
-	with (game) global.save = http_get("http://pub.colonq.computer/~prod/cgi-bin/api.cgi?" + string_join_ext("&", args));
+	with (game) global.save = http_get("https://pub.colonq.computer/~prod/cgi-bin/api.cgi?" + string_join_ext("&", args));
 }
 // button
 if (!success) {

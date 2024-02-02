@@ -4,7 +4,8 @@ if (ds_map_find_value(async_load, "id") == global.boss)
 	{
 		// set boss stats
         var res = ds_map_find_value(async_load, "result");
-		if (!string_starts_with(res, "-1") && !string_starts_with(res, "***")) {
+		// show_tooltip(res, 5);
+		if (!string_starts_with(res, "-1") && !string_starts_with(res, "***") && !string_starts_with(res, "<")) {
 			var data = string_split(res, "\n")
 			for (var i = 4; i < array_length(data); i++) data[i] = array_map(string_split(data[i], ","), real);
 			bossID = real(data[0]);
