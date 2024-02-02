@@ -212,8 +212,8 @@ function init_data() {
 			durability: 9999,
 			onuse: function(user, this, dmg, aim, isPlus, isGold) { 
 				with (this) {
-					var z = bullet_spawn_ext(bullet, -1, dmg, aim, 200, 0, 1, 2, true, false, c_white, spr_windstrike);
-					z.onstep = function(t) { damage = max(0.1, damage - t); }; 
+					z = bullet_spawn_ext(bullet, -1, dmg, aim, 200, 0, 1, 2, true, false, c_white, spr_windstrike);
+					z.onstep = function(t) { z.damage = max(0.1, z.damage - t); }; 
 					if (!isPlus) z.damage /= 10;
 				}
 			},
@@ -273,6 +273,7 @@ function init_data() {
 			class: 1,
 			durability: 10,
 			onuse: function(user, this, dmg, aim, isPlus, isGold) { 
+				this.isPlus = isPlus;
 				with (this) {
 					var size = isPlus ? 1.25 : 0.75;
 					with (this) bullet_spawn_ext(bullet_fading, 1.5, dmg, aim + 30, 150, 0, isPlus, 2, false, true, c_white, spr_spike); 
@@ -380,12 +381,12 @@ function init_data() {
 			durability: 15,
 			onuse: function(user, this, dmg, aim, isPlus, isGold) { 
 				with (this) {
-					with (bullet_spawn_ext(bullet_fading, 4, dmg, aim, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 0.5, 1);}; 
+					with (bullet_spawn_ext(bullet_fading, 4, dmg, aim, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 255 * 0.5, 255);}; 
 					if (isPlus) {
-						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim + 40, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 0.5, 1);}; 
-						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim + 20, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 0.5, 1);}; 
-						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim - 20, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 0.5, 1);}; 
-						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim - 40, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 0.5, 1);}; 
+						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim + 40, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 255 * 0.5, 255);}; 
+						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim + 20, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 255 * 0.5, 255);}; 
+						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim - 20, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 255 * 0.5, 255);}; 
+						with (bullet_spawn_ext(bullet_fading, 4, dmg, aim - 40, 240, 0, 1, 1, false, true, c_white, spr_stardust)) {image_blend = make_color_hsv(random(255), 255 * 0.5, 255);}; 
 					}
 				}
 			},
@@ -420,8 +421,8 @@ function init_data() {
 					z.isPlus = isPlus;
 					z.onstep = function(t) { yspeed += t * 200; }
 					z.dmg = dmg;
-					z.ondestroy = function(this) {
-						with (this) {
+					z.ondestroy = function(t) {
+						with (t) {
 							var inst = instance_create_depth(x, y, -100, bullet_fading);
 							inst.friendly = friendly;
 							inst.parent = parent;
@@ -439,7 +440,7 @@ function init_data() {
 			onhit: function(user, this, target, dmg, isPlus, isGold) { enemy_stun(target, 600, -darctan2(target.y - this.y, target.x - this.x), 1); },
 		},
 		{
-			name: "Wife",
+			name: "Wife Material",
 			spawnsin: [rm_stage1, rm_stage2],
 			class: 1,
 			reload: 0.7,
@@ -495,8 +496,8 @@ function init_data() {
 					var z = bullet_spawn_ext(bullet_fading, 1, dmg, aim, 0, 0, 0.5, 0, false, false, c_gray, spr_stardust) 
 					z.isPlus = isPlus;
 					z.dmg = dmg;
-					z.ondestroy = function(this) {
-						with (this) {
+					z.ondestroy = function(t) {
+						with (t) {
 							var inst = instance_create_depth(x, y, -100, bullet_fading);
 							inst.friendly = friendly;
 							inst.parent = parent;
@@ -526,7 +527,7 @@ function init_data() {
 			durability: 50,
 			onuse: function(user, this, dmg, aim, isPlus, isGold) { 
 				user._immunity = 1.2;
-				if (isPlus && this.object_index == player) object_foreach(enemy, function(x) { enemy_stun(x, 400, darctan2(x.y - player.y, x.x - player.x), 1); })
+				if (isPlus && this.object_index == player) object_foreach(enemy, function(x) { enemy_stun(x, 400, 180-darctan2(x.y - player.y, x.x - player.x), 1); })
 				with (this) with (bullet_spawn_ext(bullet, 2, dmg, 0, 0, 0, 1.5, isPlus ? 0 : 3, true, true, c_yellow, spr_smoke)) { image_alpha = 0.1; }
 			},
 		},

@@ -12,7 +12,8 @@ if (instance_exists(player)) {
 	// open
 	if (!locked) {
 		var inst = instance_place(x, y, bullet)
-		if (inst != noone && inst.friendly) {
+		if (hold > 0) hold -= delta_time / 1000000;
+		if (inst != noone && inst.friendly && hold <= 0) {
 			particle_spawn(16, x, y);
 			screen_shake(3, 0.5);
 			play_sfx(sfx_chime);
