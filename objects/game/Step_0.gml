@@ -110,6 +110,8 @@ if (instance_exists(player)) {
 	while (player.y < cameraY) cameraY -= 270;
 	while ((cameraY + 270) < player.y) cameraY += 270;
 }
+instance_deactivate_all(true);
+instance_activate_region(cameraX - 480, cameraY - 270, cameraX + 960, cameraY + 540, true);
 
 if (_screenshakeDuration > 0) _screenshakeDuration -= delta_time / 1000000;
 if (_tooltipDuration > 0) _tooltipDuration -= delta_time / 1000000;
