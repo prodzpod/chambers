@@ -22,6 +22,7 @@ maxdmg = 1;
 reload = 0.75; 
 class = irandom(2) + 1;
 hp = 250;
+maxhp = 250;
 multishot = 0;
 accuracy = 0.2 + random(0.6);
 aggressiveness = 0.2 + random(0.6);

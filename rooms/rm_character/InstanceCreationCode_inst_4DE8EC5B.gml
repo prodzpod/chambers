@@ -2,6 +2,7 @@ global.button_save = self;
 text = "Save"
 disabled = true;
 onclick = function() {
+	game.gameSpeed = 1;
 	game.save.name = global.label_name.input;
 	game.save.color_hair = player.color_hair;
 	game.save.color_arms = player.color_arms;

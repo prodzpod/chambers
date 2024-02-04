@@ -1,7 +1,7 @@
 event_inherited();
 image_speed = 0;
 if (room == rm_stage2) image_index = 1;
-else if (room == rm_stage2) image_index = 2;
+else if (room == rm_stage3) image_index = 2;
 face = sign(vrandom(1));
 states = {
 	idle: {

@@ -181,7 +181,7 @@ function set_rooms(width, exits, size, special) {
 		if (_x == width) { _x = 0; _y++; }
 	}
 	var height = _y;
-	_y += 10;
+	_y += size;
 	global.freeConnections = [];
 	// entry
 	game.dungeon = [{ idx: 0, pos: [_x, _y] }];
@@ -263,6 +263,7 @@ function set_rooms(width, exits, size, special) {
 	ds_list_clear(game.temp);
 	with (game) collision_rectangle_list(2, 2, width * 480 + 478, height * 270 + 268, all, false, true, game.temp, false);
 	map(game.temp, function(this) { instance_destroy(this) });
+	log(game.dungeon);
 	// fetch boss
 	if (game.save.online) with (game) global.boss = http_get("https://pub.colonq.computer/~prod/cgi-bin/api.cgi?action=chambers_load&room=" + room_get_name(room) + "&elo=" + string(save.elo));
 }

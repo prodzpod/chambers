@@ -39,11 +39,11 @@ if (_tooltipDuration > 0) {
 }
 
 if (instance_exists(boss) && boss.activate) {
-	var stc = make_color_hsv(0, 255, (boss.hp / 250) * 128 + 127);
+	var stc = make_color_hsv(0, 255, (boss.hp / boss.maxhp) * 128 + 127);
 	draw_set_color(c_black);
 	draw_rectangle(cameraX + offsetX + 460, cameraY + offsetY + 24, cameraX + offsetX + 472, cameraY + offsetY + 216, false);
 	draw_set_color(stc);
-	draw_rectangle(cameraX + offsetX + 462, cameraY + offsetY + 214 - (188 * (boss.hp / 250)), cameraX + offsetX + 470, cameraY + offsetY + 214, false);
+	draw_rectangle(cameraX + offsetX + 462, cameraY + offsetY + 214 - (188 * (boss.hp / boss.maxhp)), cameraX + offsetX + 470, cameraY + offsetY + 214, false);
 	draw_set_halign(fa_right);
 	draw_set_valign(fa_middle);
 	draw_text_outline(cameraX + offsetX + 476, cameraY + offsetY + 119, boss.name, stc);

@@ -1,0 +1,1 @@
+game.gameSpeed = 0;

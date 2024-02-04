@@ -29,6 +29,7 @@ if (ds_map_find_value(async_load, "id") == global.boss)
 				boss.reload = data[6][4];
 				boss.class = data[6][5];
 				boss.hp = data[6][6] * 50;
+				boss.maxhp = boss.hp;
 				boss.multishot = data[6][7];
 				boss.accuracy = data[7][0];
 				boss.aggressiveness = data[7][1];
