@@ -485,7 +485,7 @@ function describe_run(run) {
 	draw_text_outline(x + 432, y + 36, run.name + " the " + classes[run.class], c_white);
 	var t = get_timer() / 1000000;
 	struct_nullish(run, "isPB"); struct_nullish(run, "unlocks", "");
-	draw_text_outline(x + 432, y + 64, "Time: " + format_time(run.igt), run.isPB ? make_color_hsv(t * 255, 1, 1) : c_white);	
+	draw_text_outline(x + 432, y + 64, "Time: " + format_time(run.igt), run.isPB ? make_color_hsv(t * 255, 255, 255) : c_white);	
 	draw_set_font(global.fnt_small);
 	draw_text_outline(x + 432, y + 80, "RTA: " + format_time(run.rta), c_gray);	
 	draw_set_font(fnt_alagard);
