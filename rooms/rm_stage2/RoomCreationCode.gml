@@ -10,4 +10,5 @@ global.lateinit = function() {
 		"u", "d", "u", "u"
 	], 20, [1, 2]);
 	play_bgm(bgm_w2);
+	show_title("The Tower", 5, make_color_rgb(200, 200, 255));
 }

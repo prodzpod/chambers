@@ -36,12 +36,13 @@ save = {
 	type_cosmetic: 0,
 	// unlocks
 	weapon_unlocks: [],
-	cosmetic_unlocks: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+	cosmetic_unlocks: [0, 2, 3, 4, 5],
 	// stats
 	wins: 0,
 	won_with: {},
 	deaths: 0,
 	died_to: {},
+	streak: 0,
 	runs: [],
 	running_as: {},
 	pb: -1,
@@ -74,7 +75,9 @@ save = {
 	death: vk_f5,
 	// frags
 	elo: 1000,
-	online: true
+	online: true,
+	// tutorial
+	seentutorial: []
 }
 DEFAULT_SAVE = json_parse(json_stringify(save));
 
@@ -88,7 +91,7 @@ run = {
 	mindmg: 0, // -1~0: lerp 0, min, x+1 / 0~1: lerp min, max, x / 1~2: lerp max*floor(x), max*(floor(x)+1), x-floor(x)
 	maxdmg: 1,	// multiplier
 	reload: 1, // multiplier
-	range: 1,
+	mystery: 0,
 	inventory: [0],
 	durability: [-1],
 	class: 0,
@@ -96,6 +99,12 @@ run = {
 	shield: 0,
 	immunity: 1,
 	multishot: 0,
+	// achievements
+	weapon_used: {},
+	kills: 0,
+	killed: {},
+	cosmetic_unlocks: [13, 22, 24],
+	bosses_killed: [],
 }
 global.RUN_DEFAULT = json_parse(json_stringify(run)); // were so js rn
 
@@ -125,6 +134,8 @@ __cameraOffX = 0;
 __cameraOffY = 0;
 bossID = -1;
 bossElo = 1000;
+bossLoaded = true;
+bossString = "-1";
 shouldActivateBoss = 5;
 weaponroll = 3;
 

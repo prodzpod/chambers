@@ -19,6 +19,7 @@ stateName = "idle";
 state = STATE_DEFAULT;
 time_state = 0;
 stunned = false;
+enemyID = object_get_name(object_index);
 
 onstep = function(t) {
 	if (struct_exists(state, "onstep")) state.onstep(self, t);

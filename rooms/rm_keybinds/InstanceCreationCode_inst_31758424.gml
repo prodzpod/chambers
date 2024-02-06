@@ -1,2 +1,2 @@
-label = "Cancel";
+label = "Pause/Cancel";
 key = "cancel";

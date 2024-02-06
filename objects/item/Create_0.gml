@@ -6,3 +6,4 @@ __r = random(360);
 onstep = function(t) { 
 	if (grounded) xspeed = lerp(xspeed, 0, 0.5); 
 }
+onpickup = function() {}

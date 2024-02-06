@@ -2,9 +2,9 @@
 
 function run_init() {
 	game.run = json_parse(json_stringify(global.RUN_DEFAULT));
+	game.run.name = game.save.name;
 	game.gameSpeed = 1;
 	game.save.deaths += 1;
-	array_push(game.save.runs, {death: "Disconnection", inventory: []});
 	data_save();
 }
 
@@ -49,7 +49,10 @@ function player_damage(source, amount, onhit) {
 	if (player._immunity > 0) return;
 	player._immunity = game.run.immunity;
 	if (game.run.shield > 0) game.run.shield--;
-	else game.run.hp -= amount;
+	else {
+		game.run.hp -= amount;
+		array_remove(game.run.cosmetic_unlocks, 22);
+	}
 	if (!is_undefined(onhit)) onhit(source, instance_find(player, 0), amount);
 	source.onhit(amount);
 	(stat("onhurt"))(player, source, amount, game.run.class == stat("class"), game.run.inventory[0] < 0);
@@ -72,6 +75,7 @@ function enemy_damage(source, target, amount, onhit) {
 		p.aangle = vrandom(10);
 		p.size = log10(global.temp + 1) + 1;
 	});
+	if (game.cameraX + 16 < target.x && target.x < game.cameraX + 464 && game.cameraY + 16 < target.y && target.y < game.cameraY + 254) array_remove(game.run.cosmetic_unlocks, 24);
 	if (instance_exists(target)) target.onhurt(weapon, amount);
 	if (target.hp <= 0) enemy_die(target);
 }
@@ -113,12 +117,22 @@ function show_tooltip(text, duration, color=c_white) {
 	game._tooltipDuration = game.tooltipDuration;
 }
 
+function show_title(text, duration, color=c_white) {
+	with (instance_create_depth(0, 0, -100, center_text)) {
+		if (!is_undefined(text)) label = text;
+		if (!is_undefined(duration)) life = duration;
+		image_blend = color;
+		if (instance_exists(player)) { x = player.x; y = player.y; }
+	}
+}
+
 function player_die(source) {
-	array_pop(game.save.runs);
+	var name = string(pmod(floor(source.image_index), sprite_get_number(source.sprite_index))) + "/" + source.enemyID;
 	// add run info
-	var name = object_get_name(source.object_index);
-	if (!struct_exists(game.save.died_to, name)) game.save.died_to[$ name] = 0;
-	game.save.died_to[$ name]++;
+	struct_nullish(game.save.died_to, name); game.save.died_to[$ name]++;
+	var ret = save_run();
+	ret.death = name;
+	array_push(game.save.runs, ret);	
 	instance_destroy(player);
 	// display status screen
 	with (instance_create_depth(game.cameraX, game.cameraY, -100, result_screen)) success = false;
@@ -127,14 +141,13 @@ function player_die(source) {
 }
 
 function enemy_die(target) {
-	var name = object_get_name(target.object_index);
-	game.save.kills++;
-	if (!struct_exists(game.save.killed, name)) game.save.killed[$ name] = 0;
-	game.save.killed[$ name]++;
+	var name = string(pmod(floor(target.image_index), sprite_get_number(target.sprite_index))) + "/" + target.enemyID;
+	game.run.kills++; game.save.kills++;
+	struct_nullish(game.run.killed, name); struct_nullish(game.save.killed, name);
+	game.run.killed[$ name]++; game.save.killed[$ name]++;
 	particle_spawn(8, target.x, target.y);
 	screen_shake(2, 0.2);
-	if (target.object_index == boss) 
-		with (instance_create_depth(game.cameraX, game.cameraY, -100, result_screen)) success = true;
+	array_remove(game.run.cosmetic_unlocks, 13);
 	target.ondeath();
 	instance_destroy(target);
 	play_sfx(sfx_hat);
@@ -181,7 +194,7 @@ function set_rooms(width, exits, size, special) {
 		if (_x == width) { _x = 0; _y++; }
 	}
 	var height = _y;
-	_y += size;
+	_y += size + array_length(special);
 	global.freeConnections = [];
 	// entry
 	game.dungeon = [{ idx: 0, pos: [_x, _y] }];
@@ -265,6 +278,7 @@ function set_rooms(width, exits, size, special) {
 	map(game.temp, function(this) { instance_destroy(this) });
 	log(game.dungeon);
 	// fetch boss
+	game.bossString = "-1";
 	if (game.save.online) with (game) global.boss = http_get("https://pub.colonq.computer/~prod/cgi-bin/api.cgi?action=chambers_load&room=" + room_get_name(room) + "&elo=" + string(save.elo));
 }
 
@@ -308,6 +322,44 @@ function block_room(x, y, c) {
 	}
 }
 
+function set_boss(res) {
+	instance_activate_object(boss);
+	if (!string_starts_with(res, "-1") && !string_starts_with(res, "***") && !string_starts_with(res, "<")) {
+		var data = string_split(res, "\n")
+		for (var i = 4; i < array_length(data); i++) data[i] = array_map(string_split(data[i], ","), real);
+		game.bossID = real(data[0]);
+		game.bossElo = real(data[1]);
+		if (instance_exists(boss)) {
+			boss.name = base64_decode_safe(data[2]);
+			boss.date = date_from_timestamp(data[3]);
+			boss.color_hair = data[4][0];
+			boss.color_skin = data[4][1];
+			boss.color_shirt = data[4][2];
+			boss.color_arms = data[4][3];
+			boss.color_legs = data[4][4];
+			boss.color_legr = make_color_hsv(color_get_hue(boss.color_legs), color_get_saturation(boss.color_legs), color_get_value(boss.color_legs) * 0.5);
+			boss.type_hair = data[4][5];
+			boss.type_cosmetic = data[4][6];
+			boss.inventory = array_shuffle(data[5]);
+			boss.jump = data[6][0];
+			boss.move = data[6][1];
+			boss.mindmg = data[6][2];
+			boss.maxdmg = data[6][3];
+			boss.reload = data[6][4];
+			boss.class = data[6][5];
+			boss.hp = data[6][6] * 50;
+			boss.maxhp = boss.hp;
+			boss.multishot = data[6][7];
+			boss.accuracy = data[7][0];
+			boss.aggressiveness = data[7][1];
+			boss.moviness = data[7][2];
+			boss.jumpiness = data[7][3];
+			boss.switchiness = data[7][4];
+		}
+		game.bossString = "-1";
+	}
+}
+
 function play_bgm(idx) {
 	audio_stop_sound(game.bgm);
 	game.bgm = audio_play_sound(idx, 0, true, game.save.bgm);
@@ -315,4 +367,163 @@ function play_bgm(idx) {
 
 function play_sfx(idx) {
 	audio_play_sound(idx, 0, false, game.save.sfx);
+}
+
+function setup_compendium(spr, page) {
+	// setup of setup
+	global.COMPENDIUM_COL = 5;
+	global.COMPENDIUM_ROW = 2;
+	instance_destroy(arrow);
+	instance_destroy(compendium_button);
+	instance_destroy(compendium_text);
+	global.temp = {spr: spr, page: page};
+	var get = function(i, key) { return struct_default(global.temp.spr == spr_cosmetic ? game.COSMETICS[i] : game.WEAPON[i], key, game.DEFAULT_WEAPON); }
+	var has = function(i) { return array_contains(global.temp.spr == spr_cosmetic ? game.save.cosmetic_unlocks : game.save.weapon_unlocks, i); }
+	// spawn arrows
+	var head = page * global.COMPENDIUM_COL * global.COMPENDIUM_ROW;
+	var tail = head + (global.COMPENDIUM_COL * global.COMPENDIUM_ROW);
+	if (page > 0) with (instance_create_depth(30, 135, 0, arrow)) { onchange = function(t) { setup_compendium(global.temp.spr, global.temp.page - 1); }; image_xscale = -4; image_yscale = 4; };
+	if (tail < sprite_get_number(spr)) with (instance_create_depth(450, 135, 0, arrow)) { onchange = function(t) { setup_compendium(global.temp.spr, global.temp.page + 1); }; image_xscale = 4; image_yscale = 4; };
+	// generate buttons
+	global.temp.text = instance_create_depth(240, 240, 0, compendium_text);
+	for (var j = 0; j < global.COMPENDIUM_ROW; j++) {
+		for (var i = 0; i < global.COMPENDIUM_COL; i++) {
+			if (head >= sprite_get_number(spr)) break; 
+			var _x = lerp(32, 448, (i + 0.5) / global.COMPENDIUM_COL);
+			var _y = lerp(64, 230, (j + 0.5) / global.COMPENDIUM_ROW);
+			with (instance_create_depth(_x, _y, 0, compendium_button)) {
+				image_xscale = 2;
+				image_yscale = image_xscale;
+				label = has(head) ? get(head, "name") + "\n" + get(head, "desc") : get(head, "unlock");
+				image_blend = has(head) ? c_white : make_color_rgb(128, 0, 0);
+				if (spr == spr_cosmetic) { 
+					if (get(head, "unlock") != "") unlock = c_lime; 
+				}
+				else {
+					switch (get(head, "class")) {
+						case 1:
+							unlock = c_red;
+							break;
+						case 2:
+							unlock = c_lime;
+							break;
+						case 3:
+							unlock = c_aqua;
+							break;
+					}
+					if (has(head)) label += "Used in " + string(game.save.won_with[$ head]) + " runs";
+					else label += "Win the game holding this item to unlock this entry."
+				}
+				self.spr = spr;
+				idx = head;
+			}
+			head++;
+		}
+	}
+}
+
+function save_run() {
+	var ret = json_parse(json_stringify(game.run));
+	struct_remove(ret, "durability");
+	struct_remove(ret, "hp");
+	struct_remove(ret, "shield");
+	struct_remove(ret, "cosmetic_unlocks");
+	ret.date = date_timestamp();
+	if (game.save.online) ret.elo = game.save.elo;
+	return ret;
+}
+
+function describe_run(run) {
+	var get_sprite = function(s) { return object_get_sprite(asset_get_index(string_split(s, "/")[1])); }
+	var get_name = function(s) { return string_upper(string_char_at(s, 1)) + string_lower(string_copy(s, 2, string_length(s) - 1)); }
+	var get_index = function(s) { return real(string_split(s, "/")[0]); }
+	var success = !struct_exists(run, "death");
+	// sets
+	draw_set_color(c_black);
+	draw_set_halign(fa_left);
+	draw_set_valign(fa_top);
+	draw_text_outline(x + 48, y + 64, success ? "Conquested:" : "Vanquished by:", c_white);
+	var PORT_X = x + 76;
+	var PORT_Y = y + 128;
+	var PORT_SIZE = 2;
+	if (success) {
+		draw_sprite_ext(spr_player, 1, PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, run.color_skin, 1);
+		draw_sprite_ext(spr_player, 2, PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, run.color_shirt, 1);
+		draw_sprite_ext(spr_player, 3, PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, run.color_arms, 1);
+		draw_sprite_ext(spr_player, 4, PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, run.color_legs, 1);
+		draw_sprite_ext(spr_player, 5, PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, make_color_hsv(color_get_hue(run.color_legs), color_get_saturation(run.color_legs), color_get_value(run.color_legs) * 0.5), 1);
+		draw_sprite_ext(spr_hair, run.type_hair, PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, run.color_hair, 1);
+		draw_sprite_ext(spr_cosmetic, run.type_cosmetic, PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, c_white, 1);
+		var it = array_random(run.opponent_inventory);
+		draw_sprite_ext(spr_weapon, abs(it), PORT_X + (6 * PORT_SIZE), PORT_Y - (9 * PORT_SIZE), PORT_SIZE, PORT_SIZE, 0, sign(it) == 1 ? c_white : c_yellow, 1);
+		draw_text_outline(x + 92, y + 112, get_name(run.opponent_name), c_white);
+	} else {
+		draw_sprite_ext(get_sprite(run.death), get_index(run.death), PORT_X, PORT_Y, PORT_SIZE, PORT_SIZE, 0, c_white, 1);
+		draw_text_outline(x + 92, y + 112, get_name(string_split(run.death, "/")[1]), c_white);
+	}
+	draw_text_outline(x + 48, y + 144, "Loot Gathered", c_white);
+	var items = [0, 0, (run.immunity - 1) * 2, 0, (run.jump - 500) / 25, (run.move - 350) / 25, run.mystery, run.multishot * 20, (run.maxdmg - 1) * 4, run.mindmg * 4];
+	var category = 0; var idx = 0; var ks = struct_get_names(run.weapon_used);
+	for (; idx < array_length(ks); idx += 2) {
+		if (idx % 16 == 0 && idx % 32 != 0) idx += 16;
+		var _x = x + 48 + (6 * (idx % 16));
+		var _y = y + 172 + (6 * floor(idx / 16));
+		draw_sprite(spr_weapon, abs(ks[idx]), _x, _y);
+	}
+	while (category < array_length(items)) {
+		if (items[category] <= 0) category++;
+		else {
+			var _x = x + 48 + (6 * (idx % 16));
+			var _y = y + 172 + (6 * floor(idx / 16));
+			draw_sprite(spr_item, category, _x, _y);
+			idx++;
+			items[category]--;
+		}
+	}
+	draw_set_halign(fa_right);
+	var classes = ["Entity", "Warrior", "Hunter", "Mage"];
+	draw_text_outline(x + 432, y + 36, run.name + " the " + classes[run.class], c_white);
+	var t = get_timer() / 1000000;
+	struct_nullish(run, "isPB"); struct_nullish(run, "unlocks", "");
+	draw_text_outline(x + 432, y + 64, "Time: " + format_time(run.igt), run.isPB ? make_color_hsv(t * 255, 1, 1) : c_white);	
+	draw_set_font(global.fnt_small);
+	draw_text_outline(x + 432, y + 80, "RTA: " + format_time(run.rta), c_gray);	
+	draw_set_font(fnt_alagard);
+	draw_text_outline(x + 432, y + 96, "Foes Defeated:", c_white);
+	var bk = array_length(run.bosses_killed) == 0 ? ["None"] : run.bosses_killed;
+	draw_text_outline(x + 432, y + 112, string_join_ext("\n", bk), c_white);
+	draw_text_outline(x + 432, y + 128 + (14 * array_length(bk)), "Items Unlocked:", c_white);
+	draw_text_outline(x + 432, y + 144 + (14 * array_length(bk)), run.unlocks == "" ? "None" : run.unlocks, run.unlocks == "" ? c_white : c_lime);
+}
+
+function setup_stats() {
+	instance_destroy(arrow);
+	instance_destroy(stats_text);
+	instance_destroy(log_text);
+	instance_create_depth(0, 32, 0, stats_text);
+}
+
+function setup_logs(i) {
+	global.temp = {i:i};
+	instance_destroy(arrow);
+	instance_destroy(stats_text);
+	instance_destroy(log_text);
+	if (i > 0) with (instance_create_depth(30, 135, 0, arrow)) { onchange = function(t) { setup_logs(global.temp.i - 1); }; image_xscale = -4; image_yscale = 4; };
+	if (i < array_length(game.save.runs) - 1) with (instance_create_depth(450, 135, 0, arrow)) { onchange = function(t) { setup_logs(global.temp.i + 1); }; image_xscale = 4; image_yscale = 4; };
+	with (instance_create_depth(0, 32, 0, log_text)) { run = game.save.runs[i]; }
+}
+
+function show_tutorial(label, text) {
+	if (array_contains(game.save.seentutorial, label)) return;
+	array_push(game.save.seentutorial, label);
+	with (instance_create_depth(game.cameraX, game.cameraY, -199, tutorial)) {
+		self.title = label;
+		self.text = text;
+		if (instance_exists(player)) { x = player.x - pmod(player.x, 480); y = player.y - pmod(player.y, 270); }
+	}
+	// proon
+	if (array_length(game.save.seentutorial) == 7) {
+		if (instance_exists(player)) array_push(game.run.cosmetic_unlocks, 5);
+		else array_push(game.save.cosmetic_unlocks, 5);
+	}
 }

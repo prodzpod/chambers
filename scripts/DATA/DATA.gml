@@ -20,14 +20,14 @@ function init_data() {
 
 	COSMETICS = [
 		{
-			name: "",
+			name: "No Cosmetic",
 			unlock: "",
-			desc: ""
+			desc: "Clean and Classic"
 		},
 		{
 			name: "Verified",
-			unlock: "",
-			desc: "Become Verified"
+			unlock: "Defeat (or become) LCOLONQ.",
+			desc: "Defeat (or become) LCOLONQ."
 		},
 		{
 			name: "Yellow Page",
@@ -45,22 +45,17 @@ function init_data() {
 			desc: "All good."
 		},
 		{
-			name: ":3",
-			unlock: "",
-			desc: ">:3c"
+			name: ":proon:",
+			unlock: "Read all tutorials.",
+			desc: "Read all tutorials."
 		},
 		{
 			name: "Gamer",
-			unlock: "Beat 1 game.",
-			desc: "Beat 1 game."
+			unlock: "Win the game.",
+			desc: "Win the game."
 		},
 		{
-			name: "Ghoul Mode",
-			unlock: "Die once.",
-			desc: "Die once."
-		},
-		{
-			name: ":ox:",
+			name: "Ox Reaction",
 			unlock: "Beat the game as Warrior.",
 			desc: "Beat the game as Warrior."
 		},
@@ -75,79 +70,85 @@ function init_data() {
 			desc: "Beat the game as Mage."
 		},
 		{
-			name: "Cute Bow",
-			unlock: "Reach Maximum Health.",
-			desc: "Reach Maximum Health."
+			name: "Extra Lives",
+			unlock: "?? Become So Back ??",
+			desc: "Win with less than 1 HP."
 		},
 		{
-			name: "Bnuuy",
-			unlock: "Beat the game within X minutes.",
+			name: "Cute Bow",
+			unlock: "?? Get Extremely Buffed ??",
+			desc: "Reach >15 Health."
+		},
+		{
+			name: "Super Bnuuyhop",
+			unlock: "?? AGILE is Key ??",
 			desc: "Beat the game within X minutes."
 		},
 		{
 			name: "\"Friend\"",
-			unlock: "...Friendly...Peaceful...",
-			desc: "Win without killing any boss minions."
+			unlock: "?? Let The Creatures Live ??",
+			desc: "Win without killing any non-boss enemies."
 		},
 		{
 			name: "The Law",
-			unlock: "...Disordered...Rebelling...",
+			unlock: "?? Get a Speeding Ticket ??",
 			desc: "Win without entering the first area."
 		},
 		{
 			name: "Tinfoil Hat",
-			unlock: "...Atomic...Secret...",
-			desc: "Obtain a Golden Nuke."
+			unlock: "?? Wish for Annihilation ??",
+			desc: "Obtain a Nuke."
 		},
 		{
 			name: "Nature Spirit",
-			unlock: "...Wooden...Mundane...",
-			desc: "Win without using Guns as Hunter."
+			unlock: "?? Hunt Barehanded ??",
+			desc: "Beat the first boss only using your fists."
 		},
 		{
-			name: "Im Geezer",
-			unlock: "...Jong...Tenpai...",
-			desc: "Unlocks in April Fools."
+			name: "Mark of Enemy",
+			unlock: "?? Become a Challenger ??",
+			desc: "Gain Over 2000 ELO."
 		},
 		{
-			name: "Symbol of Flight",
-			unlock: "...Lava...Hovering...",
+			name: "Featherly Pride",
+			unlock: "?? Wrap Around Endlessly ??",
 			desc: "Beat the final boss without touching the ground."
 		},
 		{
 			name: "Glitch Gremlin",
-			unlock: "...Boundless...Exceptions...",
+			unlock: "?? Explore the Far Lands ??",
 			desc: "Go out of bounds."
 		},
 		{
-			name: "The Game Ender",
-			unlock: "...Obliteration...Domination...",
+			name: "Game Ender",
+			unlock: "?? Dominate Your Opponent ??",
 			desc: "Beat the final boss in 5 seconds or less."
 		},
 		{
-			name: "Is this a Bit",
-			unlock: "...Peculiar...Indirect...",
-			desc: "Beat the final boss without hitting it."
+			name: "Chat is this real",
+			unlock: "?? Be Mysterious ??",
+			desc: "Gain 10 or more \"Mystery\" points."
 		},
 		{
-			name: "Wizard Hat",
-			unlock: "...Bearded...Magical...",
+			name: "Wizard's Hat",
+			unlock: "?? Become Insanely Cracked ??",
 			desc: "Beat the game without taking damage."
 		},
 		{
 			name: "Developers",
-			unlock: "...Developers...Developers...",
+			unlock: "?? \"Developers\" ??",
 			desc: "Wish for \"Developers\"."
 		},
 		{
-			name: "Bright Idea",
-			unlock: "...Creative...Sneaky...",
-			desc: "Win without killing normal monsters on screen."
+			name: "Chamber Master",
+			unlock: "?? Out of Sight, Out of Mind ??",
+			desc: "Win without killing anyone on screen."
 		}
 	];
 	
 	DEFAULT_WEAPON = {
 		name: "",
+		unlock: "",
 		desc: "",
 		reload: 0.2,
 		mindmg: 1,
@@ -170,7 +171,7 @@ function init_data() {
 			onuse: function(user, this, dmg, aim, isPlus, isGold) { 
 				 with (this) with (bullet_spawn_ext(bullet, 0.1, dmg, aim, 0, 0, 1, 2, false, true, c_white, spr_fist)) {}; 
 			},
-			onhit: function(user, this, target, dmg, isPlus, isGold) { enemy_stun(target, 150, -darctan2(target.y - this.y, target.x - this.x), 0.15); },
+			onhit: function(user, this, target, dmg, isPlus, isGold) { enemy_stun(target, 150, -darctan2(target.y - this.y, target.x - this.x), 0.05); },
 		},
 		{
 			name: "Iron Sword",
@@ -324,7 +325,7 @@ function init_data() {
 			spawnsin: [rm_stage2, rm_stage3],
 			reload: 1.2,
 			mindmg: 4,
-			maxdmg: 14,
+			maxdmg: 44,
 			recoil: 60,
 			class: 1,
 			durability: 25,
@@ -332,9 +333,9 @@ function init_data() {
 				with (this) {
 					with (bullet_spawn_ext(bullet_fading, 0.4, dmg, aim, 100, 0, 2, 2, true, true, c_white, spr_slash)) onstep = function(t) { image_xscale += 0.25 * t; image_yscale += 0.25 * t }; 
 					if (isPlus) {
-						with (bullet_spawn_ext(bullet_fading, 0.4, dmg, aim + 150, 100, 0, 0.5, 2, true, true, c_white, spr_slash)) onstep = function(t) { image_xscale += 0.25 * t; image_yscale += 0.25 * t }; 
-						with (bullet_spawn_ext(bullet_fading, 0.4, dmg, aim + 180, 100, 0, 0.5, 2, true, true, c_white, spr_slash)) onstep = function(t) { image_xscale += 0.25 * t; image_yscale += 0.25 * t }; 
-						with (bullet_spawn_ext(bullet_fading, 0.4, dmg, aim + 210, 100, 0, 0.5, 2, true, true, c_white, spr_slash)) onstep = function(t) { image_xscale += 0.25 * t; image_yscale += 0.25 * t }; 
+						with (bullet_spawn_ext(bullet_fading, 0.4, dmg, aim + 150, 100, 0, 1, 2, true, true, c_white, spr_slash)) onstep = function(t) { image_xscale += 0.25 * t; image_yscale += 0.25 * t }; 
+						with (bullet_spawn_ext(bullet_fading, 0.4, dmg, aim + 180, 100, 0, 1, 2, true, true, c_white, spr_slash)) onstep = function(t) { image_xscale += 0.25 * t; image_yscale += 0.25 * t }; 
+						with (bullet_spawn_ext(bullet_fading, 0.4, dmg, aim + 210, 100, 0, 1, 2, true, true, c_white, spr_slash)) onstep = function(t) { image_xscale += 0.25 * t; image_yscale += 0.25 * t }; 
 					}
 				}
 			},
@@ -541,6 +542,8 @@ function init_data() {
 			recoil: 60,
 			durability: 1/3,
 			onuse: function(user, this, dmg, aim, isPlus, isGold) { 
+				instance_activate_object(enemy);
+				instance_deactivate_object(boss);
 				with (this) bullet_spawn_ext(bullet_fading, 0, 99999, 0, 0, 0, 100, 100, true, true, c_white, spr_smoke);
 			},
 		}
@@ -560,12 +563,16 @@ function data_load() {
 	var f = file_text_open_read("./save.json");
 	var str = "";
 	while (!file_text_eof(f)) str += file_text_readln(f);
+	file_text_close(f);
 	var new_save = json_parse(str);
 	var keys = struct_get_names(new_save);
 	for (var i = 0; i < array_length(keys); i++) {
 		game.save[$ keys[i]] = new_save[$ keys[i]]; // Object.assign this
 	}
-	file_text_close(f);
+	if (!struct_exists(new_save, "seentutorial")) { // old version save
+		game.save.cosmetic_unlocks = game.DEFAULT_SAVE.cosmetic_unlocks;
+		game.save.runs = [];
+	}
 }
 
 function stat(key) { return struct_default(game.WEAPON[abs(game.run.inventory[0])], key, game.DEFAULT_WEAPON); } 
@@ -576,3 +583,4 @@ function string_pretty(n) {
 	if (floor(n) != n) return string_trim_end(string(n), ["0"]);
 	return string(n);
 }
+

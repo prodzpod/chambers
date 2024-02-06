@@ -7,4 +7,5 @@ global.lateinit = function() {
 		"l,r", "l,r", "l,r", "l,r"
 	], 5, [1, 2]);
 	play_bgm(bgm_w3);
+	show_title("The Void", 5, make_color_rgb(255, 128, 255));
 }

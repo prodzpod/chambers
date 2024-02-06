@@ -12,15 +12,22 @@ if (room != rm_character && instance_exists(player)) {
 		draw_sprite_ext(spr_weapon, abs(game.run.inventory[i]), cameraX + offsetX + 8 + (16 * i), cameraY + offsetY + 262, 1, 1, 90, sign(game.run.inventory[i]) == 1 ? c_white : c_yellow, 1);
 	for (var i = 0; i < game.run.hp; i++)
 		draw_sprite_ext(spr_heart, 0, cameraX + offsetX + 8 + (8 * i), cameraY + offsetY + 8, 1, 1, 0, c_white, 1);
-	for (var i = 0; i < game.run.shield; i++)
-		draw_sprite_ext(spr_heart, 0, cameraX + offsetX + 8 + (8 * i), cameraY + offsetY + 8, 1, 1, 0, c_aqua, 0.5);
 	if (game.run.hp % 1 != 0) {
 		var i = 4 - floor((game.run.hp % 1) * 5);
 		draw_sprite_ext(spr_heart, i, cameraX + offsetX + 8 + (8 * floor(game.run.hp)), cameraY + offsetY + 8, 1, 1, 0, c_white, 1);
 	}
+	for (var i = 0; i < game.run.shield; i++) {
+		if (i > ceil(game.run.hp)) draw_sprite_ext(spr_heart, i, cameraX + offsetX + 8 + (8 * i), cameraY + offsetY + 8, 1, 1, 0, c_black, 1);
+		draw_sprite_ext(spr_heart, 0, cameraX + offsetX + 8 + (8 * i), cameraY + offsetY + 8, 1, 1, 0, c_aqua, 0.5);
+	}
 	draw_set_halign(fa_left);
 	draw_set_valign(fa_top);
-	draw_text_outline(cameraX + offsetX + 8 + (8 * floor(game.run.hp)), cameraY + offsetY + 8, string_pretty(game.run.hp), c_white);
+	var z = floor(max(game.run.hp, game.run.shield));
+	draw_text_outline(cameraX + offsetX + 8 + (8 * z), cameraY + offsetY + 8, string_pretty(game.run.hp), c_white);
+	if (game.run.shield > 0) {
+	var wz = string_width(string_pretty(game.run.hp));
+		draw_text_outline(cameraX + offsetX + 10 + wz + (8 * z), cameraY + offsetY + 8, "+" + string_pretty(game.run.shield), make_color_rgb(128, 255, 255));
+	}
 	var stc = make_color_hsv(0, 0, player.stale * 255);
 	draw_set_color(c_black);
 	draw_rectangle(cameraX + offsetX + 8, cameraY + offsetY + 24, cameraX + offsetX + 20, cameraY + offsetY + 216, false);

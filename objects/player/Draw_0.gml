@@ -1,6 +1,3 @@
-function color_multiply(c1, c2) {
-	return make_color_rgb(color_get_red(c1) * color_get_red(c2) / 255, color_get_green(c1) * color_get_green(c2) / 255, color_get_blue(c1) * color_get_blue(c2) / 255);
-}
 var alpha = image_alpha;
 if (_immunity > 0 && _immunityBlink) alpha = lerp(alpha, 0, _immunity / game.run.immunity);
 

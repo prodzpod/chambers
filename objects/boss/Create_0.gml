@@ -1,4 +1,6 @@
 event_inherited();
+game.bossLoaded = false;
+image_speed = 0;
 // stats
 game.bossID = -1;
 game.bossElo = 1000;
@@ -83,7 +85,22 @@ onground = function(yspeed) {
 	_jump = 1;
 }
 
-onhurt = function(weapon, amount) { if (instance_exists(player)) player.accuracy += amount; }
+onhurt = function(weapon, amount) { if (instance_exists(player)) player.accuracy += amount; if (!activate) hp = maxhp; }
+ondeath = function() {
+	var z = string_lower(string_lettersdigits(name));
+	if (string_pos("not", z) == 0 && (string_pos("clonk", z) != 0 || string_pos("colonq", z) != 0 || string_pos("llll", z) != 0)) array_push(game.run.cosmetic_unlocks, 1);
+	with (instance_create_depth(game.cameraX, game.cameraY, -100, result_screen)) success = true;
+	array_push(game.run.bosses_killed, name);
+	game.run.color_hair = color_hair;
+	game.run.color_skin = color_skin;
+	game.run.color_shirt = color_shirt;
+	game.run.color_arms = color_arms;
+	game.run.color_legs = color_legs;
+	game.run.type_hair = type_hair;
+	game.run.type_cosmetic = type_cosmetic;
+	game.run.opponent_name = name;
+	game.run.opponent_inventory = inventory;
+}
 
 headbuttDamage = 0;
 
@@ -91,3 +108,6 @@ headbuttDamage = 0;
 _jump = 1;
 _reload = random(1);
 _recoil = 0;
+
+set_boss(game.bossString);
+game.bossLoaded = true;

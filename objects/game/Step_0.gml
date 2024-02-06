@@ -12,6 +12,7 @@ __cameraOffY = lerp(__cameraOffY, _cameraOffY, 0.1);
 object_foreach(physics, function(this) {
 	with (this) {
 		yspeed += global.t * grav;
+		if (yspeed > 3000) yspeed = 3000; // terminal verlocity
 		onstep(global.t);
 		var sig = sign(xspeed);
 		var tomove = floor(abs(xspeed * global.t)) * sig;
@@ -111,7 +112,7 @@ if (instance_exists(player)) {
 	while ((cameraY + 270) < player.y) cameraY += 270;
 }
 instance_deactivate_all(true);
-instance_activate_region(cameraX - 480, cameraY - 270, cameraX + 960, cameraY + 540, true);
+instance_activate_region(cameraX - 480, cameraY - 270, 1440, 810, true);
 
 if (_screenshakeDuration > 0) _screenshakeDuration -= delta_time / 1000000;
 if (_tooltipDuration > 0) _tooltipDuration -= delta_time / 1000000;
@@ -134,6 +135,10 @@ if (instance_exists(boss) && cameraX <= boss.x && boss.x <= cameraX + 480 && cam
 					break;
 			}
 			global.temp_hp = run.hp;
+			if (room == rm_stage3) {
+				global.wr = true;
+				global.wr2 = game.run.igt;
+			}
 		}
 		else if (!boss.activate) global.temp_hp = run.hp;
 	}

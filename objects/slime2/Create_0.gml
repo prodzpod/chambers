@@ -1,4 +1,5 @@
 event_inherited();
+enemyID = object_get_name(slime);
 image_speed = 0;
 if (room == rm_stage2) image_index = 1;
 else if (room == rm_stage3) image_index = 2;

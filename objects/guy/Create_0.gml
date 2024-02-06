@@ -8,7 +8,6 @@ states = {
 		onstep: function(this, t) { with (this) {
 			if (grounded && (place_meeting(x + face, y, block) || !place_meeting(x + face, y + 1, block)))
 				face = -face;
-			xspeed = SPEED * face;
 			if (instance_exists(player) 
 				&& distance_to_object(player) <= VIEW 
 				&& collision_line(xcenter, ycenter, player.xcenter, player.ycenter, block, false, true) == noone) 
@@ -37,7 +36,6 @@ states = {
 		onstep: function(this, t) { with (this) {
 			if (grounded && (place_meeting(x + face, y, block) || !place_meeting(x + face, y + 1, block)))
 				face = -face;
-			xspeed = SPEED * face;
 		}}
 	}
 }

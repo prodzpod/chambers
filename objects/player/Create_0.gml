@@ -8,6 +8,7 @@ color_arms = game.save.color_arms;
 color_legs = game.save.color_legs;
 color_legr = game.save.color_legs;
 COLOR_LEGS_SHADE = 0.5;
+enemyID = "player";
 
 type_hair = game.save.type_hair;
 type_cosmetic = game.save.type_cosmetic;
@@ -41,6 +42,9 @@ onstep = function(t) {
 	var atkInput = input_check(game.save.attack) || input_check(game.save.attack2);
 	var switchInput = input_check_pressed(game.save.reload) || input_check_pressed(game.save.reload2);
 	var deathInput = input_check_pressed(game.save.death);
+	if (game.gameSpeed > 0 && input_check_pressed(game.save.cancel) && !instance_exists(pause)) {
+		instance_create_depth(game.cameraX, game.cameraY, -200, pause);
+	}
 	if (input_check(game.save.peek) && !game.save.peekwithaim) { hInput = 0; vInput = 0; }
 	xspeed = lerp(xspeed, hInput * game.run.move, 0.5);
 	if (vInput && _jump) { yspeed = -game.run.jump; _jump -= 1; jumping = true; }
@@ -58,6 +62,12 @@ onstep = function(t) {
 	if (atkInput && _reload <= 0) {
 		// calculate after effects
 		usenum++;
+		if (game.run.inventory[0] != 0) show_tutorial("Stale and Durability", "Bar on the left indicates your stale meter. The stale meter falls every time you use the same weapon, and the lower your stale meter the lower your damage will be. Some weapons have greater damage falloff than others. The number at the bottom is this weapon's durability, and can be repaired with an item.");
+		var k = abs(game.run.inventory[0]);
+		if (!struct_exists(game.run.weapon_used, k)) {
+			struct_nullish(game.run.weapon_used, k);
+			game.run.weapon_used[$ k]++;
+		}
 		stale = max(0.1, stale * 0.9);
 		_reload = stat("reload") * game.run.reload;
 		_recoil = stat("recoil") * sign(random(2)-1);
@@ -90,6 +100,7 @@ onstep = function(t) {
 	// switch
 	if (switchInput) {
 		stale = 1;
+		if (game.run.inventory[0] != 0) show_tutorial("Throwing", "You must throw the weapon you're holding to switch to the next weapon. the queue is shown at the bottom left corner. To switch quickly, throw your weapons to the ground by aiming below your feet.");
 		var drop = array_shift(game.run.inventory);
 		if (array_length(game.run.inventory) == 0) {
 			array_push(game.run.inventory, 0);
@@ -163,8 +174,8 @@ onstep = function(t) {
 		aggressiveness += sqr((480 - distance_to_object(boss)) / 480);
 	}
 }
-
-onground = function(yspeed) { _jump = 1; }
+image_speed = 0;
+onground = function(yspeed) { _jump = 1; global.wr = false; }
 onhurt = function(source, amount) {}
 onhit = function(target, amount, weapon) {}
 

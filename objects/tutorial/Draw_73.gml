@@ -1,0 +1,10 @@
+draw_sprite_stretched_ext(spr_white, -1, x + 32, y + 32, 480 - 64, 270 - 64, c_black, 0.75);
+draw_set_halign(fa_center);
+draw_set_valign(fa_top);
+draw_text_outline(x + 240, y + 40, title, c_white);
+draw_set_halign(fa_left);
+draw_set_color(c_white);
+draw_text_ext(x + 40, y + 64, text, 16, 400);
+draw_set_halign(fa_center);
+draw_set_valign(fa_bottom);
+draw_text_outline(x + 240, y + 230, "Press Any Key", c_gray);

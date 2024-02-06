@@ -1,6 +1,6 @@
 alarm[0] = 1;
 life = 99999999;
-_life = 1;
+_life = 99999999;
 onstep = function(t) {};
 onbounce = function(angle) { return false; };
 ondestroy = function(this) {};

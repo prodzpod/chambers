@@ -10,4 +10,6 @@ global.lateinit = function() {
 		"d", "u", "u,d"
 	], 15, [1, 2]);
 	play_bgm(bgm_w1);
+	show_title("The Spritefields", 5, c_lime);
+	show_tutorial("Peeking", "Hold " + button_pretty(game.save.peek) + " along with your " + (game.save.peekwithaim ? "aim" : "movement") + " keys to peek at the next room. you can also attack while peeking.");
 }

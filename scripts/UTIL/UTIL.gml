@@ -146,7 +146,7 @@ function array_random(arr) {
 }
 
 function timeout(duration, fn) {
-	with (instance_create_depth(0, 0, 0, delay)) { time = duration; onalarm = fn; }
+	with (instance_create_depth(0, 0, 0, delay)) { time = duration; onalarm = fn; if (instance_exists(player)) { x = player.x; y = player.y; } }
 }
 
 function wheel_check(key) {
@@ -256,7 +256,7 @@ function button_pretty(key) {
 }
 
 function flash_screen(dur, a, col=c_white) {
-	with (instance_create_depth(0, 0, -100, flash)) { duration = dur; alpha = a; color = col; }
+	with (instance_create_depth(0, 0, -100, flash)) { duration = dur; alpha = a; color = col; if (instance_exists(player)) { x = player.x; y = player.y; } }
 }
 
 function elo_calculate(elo, opponent, won) {
@@ -281,4 +281,23 @@ function base64_encode_safe(s) {
 
 function base64_decode_safe(s) {
 	return base64_decode(string_replace_all(string_replace_all(string_replace_all(s, ".", "+"), "-", "/"), "_", "="));
+}
+	
+function struct_nullish(struct, id, def=0) { if (!struct_exists(struct, id)) struct[$ id] = def; }
+
+function array_remove(arr, value, amount=1) { var i = array_get_index(arr, value); if (i != -1) array_delete(arr, i, amount); }
+
+function color_multiply(c1, c2) { return make_color_rgb(color_get_red(c1) * color_get_red(c2) / 255, color_get_green(c1) * color_get_green(c2) / 255, color_get_blue(c1) * color_get_blue(c2) / 255); }
+
+function format_time(t) {  
+	var ms = floor((t % 1) * 1000);
+	var s = floor(t) % 60;
+	var m = floor(t / 60) % 60; 
+	var h = floor(t / 3600); 
+	return string_join_ext(":", array_map([h, m, s], string)) + "." + string(ms);
+}
+
+function format_date(t) {
+	var d = date_from_timestamp(t);
+	return string_join_ext("-", array_map([date_get_year(d), date_get_month(d), date_get_day(d)], string));
 }

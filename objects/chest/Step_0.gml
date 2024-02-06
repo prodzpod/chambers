@@ -6,14 +6,18 @@ if (instance_exists(player)) {
 		if (collision_rectangle(_x, _y, _x + 480, _y + 270, enemy, false, true) == noone) {
 			if (locked) { locked = false; play_sfx(sfx_hat); }
 			else if (random(1) < 0.1) particle_spawn(1, x, y)
-		} else locked = true;
+		} else {
+			locked = true;
+			show_tutorial("Unlocking Chests", "Chests can be unlocked by shooting at them when there are no enemies in the same screen. Chests contain new weapons and various stat upgrades that helps you through the journey.");
+		}
 	}
 	else if (locked) locked = false;
 	// open
 	if (!locked) {
 		var inst = instance_place(x, y, bullet)
-		if (hold > 0) hold -= delta_time / 1000000;
+		if (hold > 0) hold -= game.gameSpeed * delta_time / 1000000;
 		if (inst != noone && inst.friendly && hold <= 0) {
+			hold = 1;
 			particle_spawn(16, x, y);
 			screen_shake(3, 0.5);
 			play_sfx(sfx_chime);
